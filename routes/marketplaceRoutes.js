@@ -9,6 +9,10 @@ function getMarketplaceNode(reply, server) {
   return server.marketplaceNode;
 }
 
+function isValidPrice(price) {
+  return Number.isFinite(Number(price)) && Number(price) > 0;
+}
+
 function registerMarketplaceRoutes(fastify) {
   fastify.post("/register-node", async (request, reply) => {
     const marketplaceNode = getMarketplaceNode(reply, request.server);
@@ -25,7 +29,6 @@ function registerMarketplaceRoutes(fastify) {
 
     const { peers } = request.body;
     marketplaceNode.peers = peers;
-    console.log(`${marketplaceNode.url} synced ${marketplaceNode.peers}`);
     reply.send({ message: "Synced Peers" });
   });
 
@@ -55,6 +58,13 @@ function registerMarketplaceRoutes(fastify) {
     if (!marketplaceNode) return;
 
     const { price, songTitle } = request.body;
+    if (!songTitle || typeof songTitle !== "string") {
+      return reply.code(400).send({ message: "songTitle is required" });
+    }
+    if (!isValidPrice(price)) {
+      return reply.code(400).send({ message: "price must be a positive number" });
+    }
+
     await marketplaceNode.processTransaction({
       price,
       songTitle,
@@ -69,6 +79,9 @@ function registerMarketplaceRoutes(fastify) {
     if (!marketplaceNode) return;
 
     const { id } = request.body;
+    if (!id || typeof id !== "string") {
+      return reply.code(400).send({ message: "id is required" });
+    }
     const transaction = marketplaceNode.songs[id];
     if (!transaction) {
       return reply.send({ message: "No song exists by that id" });

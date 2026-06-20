@@ -52,12 +52,11 @@ class MarketplaceNode {
     } catch (e) {
     console.log(e.message);
     }
-    console.log({ bal: this.balance });
     }
     this.songs[id] = transaction;
     this.blockchain.pendingTransactions.push(transaction);
     if (this.blockchain.pendingTransactions.length > 4) {
-    console.log(await this.mine());
+    await this.mine();
     }
     await this.broadcastBlockchain();
     return "Processed transaction";
