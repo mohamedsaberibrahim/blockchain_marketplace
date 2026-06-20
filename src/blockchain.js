@@ -3,17 +3,17 @@ import { createHash } from "crypto";
 
 class Blockchain {
   constructor(chain, pendingTransactions = []) {
-    this.chain = chain || [this.createGenesisBlock()];
+    this.chain = chain || [this.#createGenesisBlock()];
     this.difficulty = 4;
     this.pendingTransactions = pendingTransactions;
     this.miningReward = 100;
   }
 
-  createGenesisBlock() {
+  #createGenesisBlock() {
     return new Block([], null);
   }
 
-  getLatestBlock() {
+  #getLatestBlock() {
     return this.chain[this.chain.length - 1];
   }
 
@@ -23,11 +23,19 @@ class Blockchain {
     let hash = "";
     while (hash.substring(0, this.difficulty) !== targetPrefix) {
       nonce++;
-      hash = createHash("sha256")
-        .update(JSON.stringify(this.chain) + nonce)
-        .digest("hex");
+      hash = this.#createHashForNonce(nonce);
     }
-    const previousBlock = this.getLatestBlock();
+    const previousBlock = this.#getLatestBlock();
+    this.#appendMinedBlock(previousBlock);
+  }
+
+  #createHashForNonce(nonce) {
+    return createHash("sha256")
+      .update(JSON.stringify(this.chain) + nonce)
+      .digest("hex");
+  }
+
+  #appendMinedBlock(previousBlock) {
     const newBlock = new Block(this.pendingTransactions, previousBlock.hash);
     previousBlock.nextHash = newBlock.hash;
     this.chain.push(newBlock);

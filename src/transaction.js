@@ -11,10 +11,10 @@ class Transaction {
     this.songTitle = data.songTitle || null;
     this.artist = data.artist || null;
     this.price = Number(data.price) || 0;
-    this.hash = data.hash || this.calculateHash();
+    this.hash = data.hash || this.#calculateHash();
   }
 
-  calculateHash() {
+  #calculateHash() {
     return createHash("sha256")
       .update(
         this.id +
